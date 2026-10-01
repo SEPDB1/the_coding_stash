@@ -1,6 +1,6 @@
 CREATE TABLE wielerteam
 (
-	naam varchar PRIMARY KEY,
+	naam varchar NOT NULL PRIMARY KEY,
 	afkorting char(3) NOT NULL UNIQUE,
 	landcode char(2) NOT NULL,
 	status varchar NOT NULL
@@ -9,7 +9,7 @@ CREATE TABLE wielerteam
 
 CREATE TABLE wielrenner
 (
-	naam varchar PRIMARY KEY,
+	naam varchar NOT NULL PRIMARY KEY,
 	landcode char(2) NOT NULL,
 	geboortedatum date NOT NULL,
 	geboorteplaats varchar,
@@ -20,13 +20,13 @@ CREATE TABLE wielrenner
 
 CREATE TABLE wedstrijd
 (
-	naam varchar PRIMARY KEY,
+	naam varchar NOT NULL PRIMARY KEY,
 	landcode char(2) NOT NULL
 );
 
 CREATE TABLE route
 (
-	id integer PRIMARY KEY,
+	id integer NOT NULL PRIMARY KEY,
 	vertrek varchar NOT NULL,
 	aankomst varchar NOT NULL,
 	afstand double precision NOT NULL CHECK(afstand > 0),
@@ -37,8 +37,8 @@ CREATE TABLE route
 
 CREATE TABLE rit
 (
-	wedstrijdnaam varchar REFERENCES wedstrijd(naam),
-	nr integer CHECK(nr >= 1),
+	wedstrijdnaam varchar NOT NULL REFERENCES wedstrijd(naam),
+	nr integer NOT NULL CHECK(nr >= 1),
 	datum date NOT NULL,
 	type varchar NOT NULL
 		CHECK(type in ('Road Race', 'Individual Time Trial', 'Team Time Trial')),
@@ -50,9 +50,9 @@ CREATE TABLE rit
 
 CREATE TABLE uitslag
 (
-	rennernaam varchar REFERENCES wielrenner(naam),
-	wedstrijdnaam varchar,
-	ritnr integer,
+	rennernaam varchar NOT NULL REFERENCES wielrenner(naam),
+	wedstrijdnaam varchar NOT NULL,
+	ritnr integer NOT NULL,
 	positie integer CHECK(positie > 0),
 	tijd interval CHECK(tijd > interval '0'),
 	bonustijd interval CHECK(bonustijd >= interval '0'),
