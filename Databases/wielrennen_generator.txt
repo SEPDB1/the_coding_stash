@@ -1,0 +1,68 @@
+CREATE TABLE wielerteam
+(
+	naam varchar PRIMARY KEY,
+	afkorting char(3) NOT NULL UNIQUE,
+	landcode char(2) NOT NULL,
+	status varchar NOT NULL
+		CHECK(status in ('World Tour', 'Pro Tour'))
+);
+
+CREATE TABLE wielrenner
+(
+	naam varchar PRIMARY KEY,
+	landcode char(2) NOT NULL,
+	geboortedatum date NOT NULL,
+	geboorteplaats varchar,
+	gewicht double precision CHECK(gewicht > 0),
+	lengte double precision CHECK(lengte > 0),
+	teamnaam varchar NOT NULL REFERENCES wielerteam(naam)
+);
+
+CREATE TABLE wedstrijd
+(
+	naam varchar PRIMARY KEY,
+	landcode char(2) NOT NULL
+);
+
+CREATE TABLE route
+(
+	id integer PRIMARY KEY,
+	vertrek varchar NOT NULL,
+	aankomst varchar NOT NULL,
+	afstand double precision NOT NULL CHECK(afstand > 0),
+	hoogtemeters integer NOT NULL CHECK(hoogtemeters >= 0),
+	moeilijkheid integer NOT NULL 
+		CHECK(1 <= moeilijkheid AND moeilijkheid <= 5)
+);
+
+CREATE TABLE rit
+(
+	wedstrijdnaam varchar REFERENCES wedstrijd(naam),
+	nr integer CHECK(nr >= 1),
+	datum date NOT NULL,
+	type varchar NOT NULL
+		CHECK(type in ('Road Race', 'Individual Time Trial', 'Team Time Trial')),
+	beschrijving varchar NOT NULL,
+	routeid integer NOT NULL REFERENCES route(id),
+
+	PRIMARY KEY(wedstrijdnaam, nr)
+);
+
+CREATE TABLE uitslag
+(
+	rennernaam varchar REFERENCES wielrenner(naam),
+	wedstrijdnaam varchar,
+	ritnr integer,
+	positie integer CHECK(positie > 0),
+	tijd interval CHECK(tijd > interval '0'),
+	bonustijd interval CHECK(bonustijd >= interval '0'),
+	status varchar NOT NULL
+		CHECK(status in ('Did Finish','Did Not Finish','Did Not Start', 'Over Time Limit', 'Disqualified'))
+		CHECK(status <> 'Did Finish' OR (positie IS NOT NULL AND tijd IS NOT NULL AND bonustijd IS NOT NULL))
+		CHECK(status = 'Did Finish' OR positie IS NULL)
+		CHECK(status NOT in ('Did Not Finish', 'Did Not Start') OR tijd IS NULL)
+		CHECK(status <> 'Did Not Start' or bonustijd IS NULL),
+
+	PRIMARY KEY(rennernaam, wedstrijdnaam, ritnr),
+	FOREIGN KEY(wedstrijdnaam, ritnr) REFERENCES rit(wedstrijdnaam, nr)
+);
